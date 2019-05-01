@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
 project (ADXAS)
 
+# Flags
+add_definitions("-std=c++11")
+
 # The version number.
 set (ADXAS_VERSION_MAJOR 0)
 set (ADXAS_VERSION_MINOR 1)

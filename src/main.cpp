@@ -5,22 +5,23 @@
 
 boost::mutex global_stream_lock;
 
-void worker(boost::shared_ptr<boost::asio::io_service> io_service)
+typedef void (* pfun)(void);
+
+void printmsg(pfun f)
 {
     global_stream_lock.lock();
-    std::cout << "[" << boost::this_thread::get_id() << "] Worker thread start" << std::endl;
-    global_stream_lock.unlock();
-
-    io_service->run();
-
-    global_stream_lock.lock();
-    std::cout << "[" << boost::this_thread::get_id() << "] Worker thread ended" << std::endl;
+    f();
     global_stream_lock.unlock();
 }
 
-void printnum()
+
+void worker(boost::shared_ptr<boost::asio::io_service> io_service)
 {
-    std::cout << "[" << boost::this_thread::get_id() << "] x: " << x << std::endl;
+    printmsg([](){ std::cout << "[" << boost::this_thread::get_id() << "] Worker thread start" << std::endl; });
+
+    io_service->run();
+
+    printmsg([](){ std::cout << "[" << boost::this_thread::get_id() << "] Worker thread ended" << std::endl; });
 }
 
 int main()
@@ -49,9 +50,8 @@ int main()
 	std::cin.get();
 
     // Stop services
-    global_stream_lock.lock();
-    std::cout << "Stopping services..." << std::endl;
-    global_stream_lock.unlock();
+    printmsg([](){ std::cout << "Stopping services..." << std::endl; });
+ 
     io_service->stop();  
     worker_threads.join_all();
 
